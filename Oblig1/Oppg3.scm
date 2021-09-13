@@ -59,7 +59,7 @@ til det som kommer ut av base-caset.|#
 Prøvde å gjenskape denne prosedyren både med iter-metoden og et mer standard
 rekursivt kall. Den siste ble nok litt mer elegant. 
 power-iter blir også litt forenklet da den nå ikke lenger trenger å ta inn b og
-n som argumenter, bare en e-variabel som vi kan legge til. b og n er nå allerede
+n som argumenter, bare en e-variabel som vi kan addere på. b og n er nå allerede
 i skopet til prosedyren så vi kan kalle på de også i power-iter.|#
 (define (power-close-to1 b n)
   (define (power-iter e)
@@ -79,7 +79,9 @@ i skopet til prosedyren så vi kan kalle på de også i power-iter.|#
 
 #|e)
 I blokkstrukturen av Fibonacci-prosedyren klarer jeg ikke å forenkle antall
-variabler i hjelpeprosedyren da nettopp n er telleren som prosedyren må ha. 
+variabler i hjelpeprosedyren da nettopp n er telleren som prosedyren må ha.
+Jeg trenger da å kalle på n når jeg kaller på hjelpeprosedyren i det rekursive
+kallet.
 |#
 (define (fib n)
   (define (fib-iter a b n)
