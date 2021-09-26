@@ -1,0 +1,34 @@
+(cons 42 11)
+
+(cons 42 '())
+
+(list 42 11)
+
+'(42 (11 12))
+
+(cdr (cdr (car (cdr '(42 (11 12))))))
+
+
+(define foo '(123))
+(cons foo foo)
+
+(define my-list (list '(123) '(123)))
+  
+(define my-pair (cons '(123) '(123)))
+
+"Første av liste"
+(car my-list)
+"Første av par"
+(car my-pair)
+"Andre av liste"
+(cdr my-list)
+"Andre av par"
+(cdr my-pair)
+"cdr cdr my-list"
+(cdr (cdr my-list))
+"cdr cdr my-pair"
+(cdr (cdr my-pair))
+"car cdr my-list"
+(cdr (cdr my-list))
+"car cdr my-pair"
+(cdr (cdr my-pair))
