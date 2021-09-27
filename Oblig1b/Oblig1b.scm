@@ -39,8 +39,8 @@ foo2
               (cons 42
                     '()))
         (cons (cons #t
-                  (cons 'bar
-                        '()))
+                    (cons 'bar
+                          '()))
               '())))
 my-cons
 
