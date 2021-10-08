@@ -201,7 +201,9 @@
 ;Tester
 (define freqs '((a 2) (b 5) (c 1) (d 3) (e 1) (f 3)))
 (define codebook (grow-huffman-tree freqs))
+(encode '(a b c) codebook)
 (decode (encode '(a b c) codebook) codebook)
+(encode '(a b b c b d e f) codebook)
 (decode (encode '(a b b c b d e f) codebook) codebook)
 
 (newline)
@@ -239,15 +241,15 @@
 (newline)
 (/ 43 17)
 #| Den gjennomsnittlige lengden på hvert kodeord er 43/17 som er 
-   omtrent 2.53. Lengden av bits delt på antall tegn i meldingen.
+   omtrent 2.53. Antall bits delt på antall tegn i meldingen.
 |#
 
 #| En fixed-length code trenger log2n bits per symbol for å skille mellom
    n symboler. Med 17 symboler trenger vi da log2(17)=4.09 rundet opp til 5
    bits per symbol. Hele meldingen trenger da 17*5=85 bits for å kodes.
    Vi kan også se på det som at 4 bits gir oss muligheten til å representere
-   2^4=16 ulike tekn, mens alfabetet vårt består av 17 tegn. 4 bits er altså
-   ikke nok til å representere alle de ulike tegnene, så vi trenger 5 bits
+   2^4=16 ulike tegn, mens alfabetet vårt består av 17 tegn. 4 bits er altså
+   ikke nok til å representere alle de ulike tegnene, så vi trenger 5 bits per tegn
 |#
 (newline)
 "2f"
