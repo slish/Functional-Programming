@@ -27,70 +27,94 @@ count
 (newline)
 "2a"
 
-#|(define levelup
-  (lambda ()
-    (let ((strength 10)
-          (agility 15))
-      (lambda()
-        (set! strength (+ strength 1))
-        (set! agility (+ agility 2))
-        (list strength agility)))))
-
-(define orc (levelup))
-(orc)
-(orc)|#
-
 (define (make-stack list)
-  (let ((stack list)) ;; Lokal variabel som holder på stack
-                      ;; og lagrer listen i argumentet
-    (lambda(message . list)
+  (let ((stack list))
+    (lambda (message . rest)
       (cond
         ((equal? message 'pop!)
          (if (null? stack)
-             (set! stack stack);; Do nothing
+             (set! stack stack) ;; Do nothing
              (set! stack (cdr stack))))
-             ;; Endre stack til å være cdr av stack,
-             ;; altså stack uten sin opprinnelige car.
-             ;; Ergo det samme som å fjerne det første
-             ;; elementet.
+        ((equal? message 'push!)
+         ;; Konverter stack til å være seg selv der
+         ;; vi har appendet den reverserte listen i
+         ;; argumentet inn i stacken
+         (if (list? (car rest)) ;; Måtte gjøre et krumspring for å sjekke
+                                ;; om rest er en liste i en liste, som den
+                                ;; blir om jeg sender den via (push! stack)
+             (set! stack (append (reverse (car rest)) stack))
+             (set! stack (append (reverse rest) stack))))
         ((equal? message 'stack)
          stack)
-        ;;((equal? message 'push!)
-             
         (else
-         "Error: invalid message")))))
+         "Error: Invalid message")))))
 
 (define s1 (make-stack (list 'foo 'bar)))
 (define s2 (make-stack '()))
+
 (s1 'pop!)
-(s1 'stack)
+(s1 'stack);;bar
+
+(s2 'pop!)
+(s2 'push! 1 2 3 4)
+(s2 'stack);;(4 3 2 1)
+
+(s1 'push! 'bah)
+(s1 'push! 'zap 'zip 'baz)
+(s1 'stack);;(baz zip zap bah bar)
 
 (newline)
 "2b"
-"Løsning i vedlagt fil"
+(define (pop! st)
+  (st 'pop!))
+
+(define (stack st)
+  (st 'stack))
+
+(define (push! st . rest)
+  (st 'push! rest))
+
+(pop! s1)
+(stack s1);;(zip zap bah bar)
+(push! s1 'foo 'faa)
+(stack s1);;(faa foo zip zap bah bar)
 
 (newline)
 "3a"
+"Tegning i vedlagt fil"
 (define bar (list 'a 'b 'c 'd 'e))
 (set-cdr! (cdddr bar) (cdr bar))
 (list-ref bar 0)
 (list-ref bar 3)
 (list-ref bar 4)
 (list-ref bar 5)
-;; Setter cdr av cdddr (e) lik cdr av listen. Siden
-;; elementet vi endrer på også er en del av listen
-;; får vi en evig loop.
-;; Siden bcd gjentar seg får vi b og c på listekall
-;; 4 og 5, respektive. 
+#| Setter cdr av cdddr (e) lik cdr av listen. Siden
+   elementet vi endrer på også er en del av cdr av
+   listen får vi en evig loop.
+   Siden bcd gjentar seg får vi b og c på listekall
+   4 og 5, respektive. Et listekall 6 ville ha gitt
+   d, mens et listekall 7 ville ha gitt b igjen,
+   og slik fortsetter det i evig.
+|#
 bar
 
 (newline)
 "3b"
+"Tegning i vedlagt fil"
 (define bah (list 'bring 'a 'towel))
 (set-car! bah (cdr bah))
 bah
 (set-car! (car bah) 42)
 bah
+#| Grunnen til at vi får ((42 towel) 42 towel) etter
+   det siste kallet på set-car! er fordi det første
+   elementet i bah nå er listen (a towel). Når vi da
+   spør om å endre car av det første elementet blir det
+   a vi endrer på, som nå blir til 42. Cdr av bah peker
+   også på denne listen, slik at a blir endret til 42 for
+   både car og cdr, eller rettere sagt a blir endret til
+   42 for listen som både car og cdr peker på. 
+|#
 
 (newline)
 "3c"
@@ -123,9 +147,13 @@ bah
 "3d"
 (list? bar)
 (list? bah)
-;; Kort forklart er bar ikke en liste fordi en liste per
-;; definisjon skal avsluttes med den tomme listen, eller nil.
-;; En liste er en sekvens med par, der cdr i det siste paret
-;; er den tomme listen (SICP s. 135)
+#| Kort forklart er bar ikke en liste fordi en liste per
+   definisjon skal avsluttes med den tomme listen, eller nil.
+   En liste er en sekvens med par, der cdr i det siste paret
+   er den tomme listen (SICP s. 135)
+   Per dokumentasjonen til Scheme kan vi også lese at alle lister
+   har en endelig lengde og er terminert av den tomme listen.
+https://groups.csail.mit.edu/mac/ftpdir/scheme-reports/r5rs-html/r5rs_14.html#SEC88
+|#
 
 
