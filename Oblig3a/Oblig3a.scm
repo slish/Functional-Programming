@@ -5,7 +5,6 @@
 (define old-procs (make-table))
 
 (define (mem message proc)
-  ;; Lagrer gammel prosedyre for å kunne unmemoize senere
   (let ((my-table (make-table))
         (old-proc proc))
     (cond ((equal? message 'memoize)
@@ -13,10 +12,15 @@
                   (lambda args
                     (let ((previously-computed-result
                            (lookup args my-table)))
+                      ;; Hent enten forrige beregnet resultat
+                      ;; eller la resultatet komme av å kjøre
+                      ;; prosedyren på argumentet og lagre
+                      ;; resultatet i my-table. 
                       (or previously-computed-result
                           (let ((result (apply proc args)))
                             (insert! args result my-table)
                             result))))))
+             ;; Lagrer gammel prosedyre for å kunne unmemoize senere
              (insert! new-proc old-proc old-procs)
              new-proc))
           ((equal? message 'unmemoize)
@@ -52,12 +56,26 @@
 (test-proc 40 41 42 43 44)
 
 (newline)
-"1c"
+"1c forklart i fil"
 (define mem-fib (mem 'memoize fib))
 (mem-fib 3)
 (mem-fib 3)
 (mem-fib 2)
+#| Jeg er ikke helt stødig på svaret her, men intuisjonen peker på
+at (set! fib (mem 'memoize fib)) kjører gjennom (mem 'memoize fib)
+og så endrer verdien av fib til å være prosedyren vi får som resultat,
+mens (define mem-fib (mem 'memoize fib)) peker på kjøringen av
+(mem' memoize fib). (mem-fib 3) vil da kjøre gjennom hele
+(mem' memoize fib) og lagre resultater underveis, men resultatene
+blir da utenfor skopet til rekursive kjøringer som gjør at fib of 1
+blir beregnet to ganger. Ved en ny kjøring av (mem-fib 3) er derimot
+disse lagret via forrige kjøring og kan nås direkte. (mem-fib 2)
+vil kjøre en ny prosedyre som ikke har tilgang til de lagrede verdiene
+fra (mem-fib 3) og må derfor beregne verdiene om igjen. 
 
+Jeg tar gjerne imot ekstra feedback på denne oppgaven, for jeg
+kjenner at dette er litt vagt for meg. 
+|#
 
 (newline)
 "2a"
