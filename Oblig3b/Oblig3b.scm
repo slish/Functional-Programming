@@ -5,7 +5,7 @@
 
 ;;(read-eval-print-loop)
 (newline)
-(display "1a forklart i fil\n")
+(display "***1a*** forklart i fil\n")
 #|
 (foo 2 square) => 0
 For (foo 2 square) har vi definert en prosedyre som tar inn to
@@ -35,13 +35,13 @@ Vi kjører så prosedyren else på tallet 4, som blir (else 4) = (/ 4 2) = 2
 |#
 
 (newline)
-(display "2a\n")
+(display "***2a***\n")
 "Test av '1+' og '1-'"
 (mc-eval '(1+ 2) the-global-environment)
 (mc-eval '(1- 2) the-global-environment)
 
 (newline)
-(display "2b\n")
+(display "***2b***\n")
 (display "Primitive prosedyrer og objekt før innsetting\n")
 (primitive-procedure-names)
 (newline)
@@ -62,7 +62,7 @@ Vi kjører så prosedyren else på tallet 4, som blir (else 4) = (/ 4 2) = 2
 (mc-eval '(square 6) the-global-environment)
 
 (newline)
-(display "3a\n")
+(display "***3a***\n")
 (define and-checker
   '(and
     (= 2 2)
@@ -102,7 +102,7 @@ or-checker
 (mc-eval (special-form? or-checker) the-global-environment)
 
 (newline)
-(display "3b\n")
+(display "***3b***\n")
 
 (define newif-checker
   '(if (= 2 3)
@@ -126,3 +126,73 @@ newif-checker
 (display "Sjekk om prosedyren er en special form via 'special-form?'\n")
 (mc-eval (special-form? newif-checker) the-global-environment)
 
+(newline)
+(display "***3c***\n")
+
+(define let-checker
+  '(let ((first 1)
+         (second 2)
+         (third 3))
+     (+ first second third)))
+
+(display "Test av ny let-prosedyre\n")
+(display "Hvordan prosedyren ser ut\n")
+let-checker
+
+(display "Hvordan prosedyren ser ut i lambda-ifisert versjon\n")
+(append-expressions-to-lambda
+ (let-to-lambda let-checker)
+ (let-expressions let-checker))
+
+(display "Evaluering av prosedyren, burde vise 6\n")
+(mc-eval let-checker the-global-environment)
+
+(display "Sjekk om prosedyren er en let-prosedyre via 'let?'\n")
+(mc-eval (let? let-checker) the-global-environment)
+
+(display "Sjekk om prosedyren er en special form via 'special-form?'\n")
+(mc-eval (special-form? let-checker) the-global-environment)
+
+(newline)
+(display "***3d***\n")
+"Se notat om oppgave i evaluator.scm på linje 339"
+
+;; Kode under fungerer bare om man først fjerner kommentering av relevant
+;; kode i evaluator.scm
+
+#|(define let-checker2
+  '(let x = 2 and
+        y = 3 and
+        z = 4 in
+     (display (cons x
+                    (cons y z)))
+     (+ x y z)))
+
+(display "Test av ny let-prosedyre\n")
+(display "Hvordan prosedyren ser ut\n")
+let-checker2
+
+(display "Bygger opp grunnsteinene\n")
+"parameter"
+(define params (let-parameters let-checker2))
+params
+"expressions"
+(define exps (let-expressions let-checker2))
+exps
+"kropp"
+(define letbody (let-body let-checker2))
+letbody
+"lambda"
+(define letlambda (let-to-lambda let-checker2))
+letlambda
+"lambda with expressions"
+(define lambexp (append-expressions-to-lambda letlambda exps))
+lambexp
+(display "Evaluerer det vi har bygd opp fra grunnsteiner\n")
+(mc-eval lambexp the-global-environment)
+(display "Evaluerer grunnuttrykket 'let-checker2'\n")
+(mc-eval let-checker2 the-global-environment)|#
+
+#|(car let-checker2)
+(cdr let-checker2)
+(cadddr (cdr let-checker2))|#

@@ -73,7 +73,11 @@
         Gå til evalueringsprosedyrer for and/or
         ########################################## |#
         ((and? exp) (eval-and exp env))
-        ((or? exp) (eval-or exp env))))
+        ((or? exp) (eval-or exp env))
+        #| ##########################################
+        Gå til evalueringsprosedyrer for let
+        ########################################## |#
+        ((let? exp) (eval-let exp env))))
 
 (define (special-form? exp)
   (cond ((quoted? exp) #t)
@@ -88,6 +92,10 @@
         ########################################## |#
         ((and? exp) #t)
         ((or? exp) #t)
+        #| ##########################################
+        Sjekk for å påse at let er i special form
+        ########################################## |#
+        ((let? exp) #t)
         (else #f)))
 
 (define (list-of-values exps env)
@@ -284,6 +292,99 @@ Evalueringsregler for and/or
                      (sequence->exp (cond-actions first))
                      (expand-clauses rest))))))
 
+#| #############################################################################
+   Prosedyrer for å kunne evaluere let
+############################################################################# |#
+(define (let? exp) (tagged-list? exp 'let))
+
+
+
+;; Prosedyre for å hente ut parameter fra uttrykket
+(define (let-parameters exp)
+  (define (param-get get-list returnlist)
+    (if (null? get-list)
+        (reverse returnlist)
+        (param-get (cdr get-list) (cons (caar get-list) returnlist))))
+  (param-get (let-param-exps exp) '() ))
+
+;; Prosedyre for å hente ut expressions fra uttrykket
+(define (let-expressions exp)
+  (define (exps-get get-list returnlist)
+    (if (null? get-list)
+        (reverse returnlist)
+        (exps-get (cdr get-list) (cons (cadar get-list) returnlist))))
+  (exps-get (let-param-exps exp) '() ))
+
+;; Prosedyre for å hente ut parameter og expressions fra uttrykket
+(define (let-param-exps exp) (cadr exp))
+;; Prosedyre for å hente ut kroppen fra uttrykket
+(define (let-body exp) (cddr exp))
+
+;; Bygger opp en lambda av let-uttrykket
+(define (let-to-lambda exp)
+  (make-lambda (let-parameters exp)
+               (let-body exp)))
+
+;; Appender expressions fra let-uttrykket til lambda-uttrykket
+(define (append-expressions-to-lambda lamb exps)
+    (append (list lamb) exps))
+
+;; Evaluerer et let-uttrykk
+(define (eval-let exp env)
+  (mc-eval (append-expressions-to-lambda
+            (let-to-lambda exp)
+            (let-expressions exp)) env))
+
+
+#| #############################################################################
+   Kode for nytt let-uttrykk til oppgave 3d.
+   For kjøring av oppg 3d må kommentarer fjernes fra seksjon under og fra
+   delen for oppg 3d i Oblig3b.scm
+   Samtidig må seksjon over og delen for oppgb 3c i Oblig3b.scm kommenteres ut
+############################################################################# |#
+
+#|
+
+;; Prosedyre for å hente ut parameter fra nytt let-uttrykk
+(define (let-parameters exp)
+  (define (param-get get-list returnlist)
+    (if (equal? (cadddr get-list) 'in)
+        (reverse (append (list (car get-list)) returnlist))
+        (param-get (cddddr get-list) (cons (car get-list) returnlist))))
+  (param-get (cdr exp) '()))
+
+;; Prosedyre for å hente ut expressions fra nytt let-uttrykk
+(define (let-expressions exp)
+  (define (exps-get get-list returnlist)
+    (if (equal? (cadddr get-list) 'in)
+        (reverse (append (list (caddr get-list)) returnlist))
+        (exps-get (cddddr get-list) (cons (caddr get-list) returnlist))))
+  (exps-get (cdr exp) '()))
+
+;; Prosedyre for å hente ut kropp fra nytt let-uttrykk
+(define (let-body exp)
+  (define (in-finder search-list)
+    (if (equal? (car search-list) 'in)
+        (cdr search-list)
+        (in-finder (cdr search-list))))
+  (in-finder exp))
+
+;; Bygger opp en lambda av let-uttrykket
+(define (let-to-lambda exp)
+  (make-lambda (let-parameters exp)
+               (let-body exp)))
+
+;; Appender expressions fra let-uttrykket til lambda-uttrykket
+(define (append-expressions-to-lambda lamb exps)
+  (append (list lamb) exps))
+
+;; Evaluerer nytt let-uttrykk
+(define (eval-let exp env)
+  (mc-eval (append-expressions-to-lambda
+            (let-to-lambda exp)
+            (let-expressions exp)) env))
+
+|#
 
 ;;; Evaluatorens interne datastrukturer for å representere omgivelser,
 ;;; prosedyrer, osv (seksjon 4.1.3, SICP):
