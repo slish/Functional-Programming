@@ -68,12 +68,7 @@
                          env))
         ((begin? exp) 
          (eval-sequence (begin-actions exp) env))
-        ((cond? exp) (mc-eval (cond->if exp) env))
-        #| ##########################################
-        Gå til evalueringsprosedyrer for and/or
-        ########################################## |#
-        ((and? exp) (eval-and exp env))
-        ((or? exp) (eval-or exp env))))
+        ((cond? exp) (mc-eval (cond->if exp) env))))
 
 (define (special-form? exp)
   (cond ((quoted? exp) #t)
@@ -83,11 +78,6 @@
         ((lambda? exp) #t)
         ((begin? exp) #t)
         ((cond? exp) #t)
-        #| ##########################################
-        Sjekk for å påse at and/or er i special form
-        ########################################## |#
-        ((and? exp) #t)
-        ((or? exp) #t)
         (else #f)))
 
 (define (list-of-values exps env)
@@ -96,44 +86,10 @@
       (cons (mc-eval (first-operand exps) env)
             (list-of-values (rest-operands exps) env))))
 
-#| ###########################################################
-Redefinerer evalueringen av if til å kunne bruke elsif-syntaks
-########################################################### |#
-#|(define (eval-if exp env)
+(define (eval-if exp env)
   (if (true? (mc-eval (if-predicate exp) env))
       (mc-eval (if-consequent exp) env)
-      (mc-eval (if-alternative exp) env)))|#
-
-(define (eval-if exp env)
-  (define (if-checker logic-list)
-    (if (true? (mc-eval (equal? (car logic-list) 'else) env))
-        (mc-eval (cadr logic-list) env)
-        (if (true? (mc-eval (cadr logic-list) env))
-            (mc-eval (cadddr logic-list) env)
-            (if-checker (cddddr logic-list)))))
-  (if-checker exp))
-    
-
-#| ###########################################################
-Evalueringsregler for and/or
-########################################################### |#
-(define (eval-and exp env)
-  (define (and-checker logic-list)
-    (if (true? (mc-eval (null? logic-list) env))
-        #t
-        (if (true? (mc-eval (car logic-list) env))
-            (and-checker (cdr logic-list))
-            #f)))
-  (and-checker (and-or-tests exp)))
-  
-(define (eval-or exp env)
-  (define (or-checker logic-list)
-    (if (true? (mc-eval (null? logic-list) env))
-        #f
-        (if (false? (mc-eval (car logic-list) env))
-            (or-checker (cdr logic-list))
-            #t)))
-  (or-checker (and-or-tests exp)))
+      (mc-eval (if-alternative exp) env)))
 
 (define (eval-sequence exps env)
   (cond ((last-exp? exps) (mc-eval (first-exp exps) env))
@@ -219,16 +175,6 @@ Evalueringsregler for and/or
 
 (define (make-if predicate consequent alternative)
   (list 'if predicate consequent alternative))
-
-#| #############################################################################
-   Sjekk om et uttrykk er av typen or/and
-############################################################################# |#
-(define (or? exp) (tagged-list? exp 'or))
-(define (and? exp) (tagged-list? exp 'and))
-#| #############################################################################
-   Abstraksjons av selektører for and/or. Tar ut en liste av de logiske testene
-############################################################################# |#
-(define (and-or-tests exp) (cdr exp))
 
 
 (define (begin? exp) (tagged-list? exp 'begin))
@@ -424,11 +370,6 @@ Evalueringsregler for and/or
         (list 'newline 
               (lambda () (newline) 'ok))
 ;;      her kan vi legge til flere primitiver.
-        ;; Primitiver for å legge til ellet trekke fra 1
-        (list '1+
-              (lambda (x) (+ x 1)))
-        (list '1-
-              (lambda (x) (- x 1)))
         ))
 
 (define (primitive-procedure-names)
@@ -444,15 +385,6 @@ Evalueringsregler for and/or
 (define (apply-primitive-procedure proc args)
   (apply-in-underlying-scheme
    (primitive-implementation proc) args))
-
-#| ###################################################################
-   Implementert prosedyre for å legge til nye primitiver
-################################################################### |#
-(define (install-primitive! msg proc)
-  (let ((insertion-list primitive-procedures))
-    (set! primitive-procedures (append insertion-list
-                                       (list (list msg proc))))
-    (set! the-global-environment (setup-environment))))
 
 
 ;;; Hjelpeprosedyrer for REPL-interaksjon (SICP seksjon 4.1.4)

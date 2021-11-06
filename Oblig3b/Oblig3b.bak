@@ -1,0 +1,5 @@
+(load "evaluator.scm")
+
+(set! the-global-environment (setup-environment))
+
+(mc-eval '(+ 1 2) the-global-environment)
