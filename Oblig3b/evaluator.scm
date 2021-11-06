@@ -297,8 +297,9 @@ Evalueringsregler for and/or
 ############################################################################# |#
 (define (let? exp) (tagged-list? exp 'let))
 
-
-
+#| #############################################################################
+   Kommenter ut herfra og ned for å kunne kjøre oppg 3d
+############################################################################# |#
 ;; Prosedyre for å hente ut parameter fra uttrykket
 (define (let-parameters exp)
   (define (param-get get-list returnlist)
@@ -334,7 +335,6 @@ Evalueringsregler for and/or
   (mc-eval (append-expressions-to-lambda
             (let-to-lambda exp)
             (let-expressions exp)) env))
-
 
 #| #############################################################################
    Kode for nytt let-uttrykk til oppgave 3d.
@@ -525,7 +525,9 @@ Evalueringsregler for and/or
         (list 'newline 
               (lambda () (newline) 'ok))
 ;;      her kan vi legge til flere primitiver.
-        ;; Primitiver for å legge til ellet trekke fra 1
+        #| ##############################################
+        ;; Primitiver for å legge til eller trekke fra 1
+        ############################################## |#
         (list '1+
               (lambda (x) (+ x 1)))
         (list '1-

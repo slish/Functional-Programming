@@ -1,7 +1,6 @@
 (load "evaluator.scm")
 
 (set! the-global-environment (setup-environment))
-(define global the-global-environment)
 
 ;;(read-eval-print-loop)
 (newline)
@@ -36,7 +35,7 @@ Vi kjører så prosedyren else på tallet 4, som blir (else 4) = (/ 4 2) = 2
 
 (newline)
 (display "***2a***\n")
-"Test av '1+' og '1-'"
+(display "Test av '1+' og '1-'\n")
 (mc-eval '(1+ 2) the-global-environment)
 (mc-eval '(1- 2) the-global-environment)
 
@@ -68,38 +67,57 @@ Vi kjører så prosedyren else på tallet 4, som blir (else 4) = (/ 4 2) = 2
     (= 2 2)
     (= 2 3)))
 
+(define and-checker2
+  '(and
+    (= 2 2)
+    (= 3 3)))
+
 (define or-checker
   '(or
     (= 3 2)
     (= 4 2)
     (= 2 2)))
 
-(display "Test av and-prosedyre\n")
-(display "Hvordan prosedyren ser ut\n")
+(define or-checker2
+  '(or
+    (= 3 2)
+    (= 4 2)
+    (= 5 2)))
+
+(display "Test av and-prosedyrene\n")
+(display "Hvordan prosedyrene ser ut\n")
 and-checker
+and-checker2
 
-(display "Evaluering av prosedyren, burde bli #f\n")
+(display "Evaluering av prosedyren, burde bli #f, #t\n")
 (mc-eval and-checker the-global-environment)
+(mc-eval and-checker2 the-global-environment)
 
-(display "Sjekk om prosedyren er en and-prosedyre via 'and?'\n")
+(display "Sjekk om prosedyrene er en and-prosedyre via 'and?'\n")
 (mc-eval (and? and-checker) the-global-environment)
+(mc-eval (and? and-checker2) the-global-environment)
 
-(display "Sjekk om prosedyren er en special form via 'special-form?'\n")
+(display "Sjekk om prosedyrene er en special form via 'special-form?'\n")
 (mc-eval (special-form? and-checker) the-global-environment)
+(mc-eval (special-form? and-checker2) the-global-environment)
 
 (newline)
-(display "Test av or-prosedyre\n")
+(display "Test av or-prosedyrene\n")
 (display "Hvordan prosedyren ser ut\n")
 or-checker
+or-checker2
 
-(display "Evaluering av prosedyren, burde bli #t\n")
+(display "Evaluering av prosedyren, burde bli #t, #f\n")
 (mc-eval or-checker the-global-environment)
+(mc-eval or-checker2 the-global-environment)
 
 (display "Sjekk om prosedyren er en or-prosedyre via 'or?'\n")
 (mc-eval (or? or-checker) the-global-environment)
+(mc-eval (or? or-checker2) the-global-environment)
 
 (display "Sjekk om prosedyren er en special form via 'special-form?'\n")
 (mc-eval (special-form? or-checker) the-global-environment)
+(mc-eval (special-form? or-checker2) the-global-environment)
 
 (newline)
 (display "***3b***\n")
@@ -107,24 +125,33 @@ or-checker
 (define newif-checker
   '(if (= 2 3)
        then (+ 1 0)
-       elsif (= 2 3)
+    elsif (= 2 3)
        then (+ 2 0)
-       elsif (= 2 3)
+    elsif (= 2 3)
        then (+ 3 0)
-       else (+ 4 0)))
+    else (+ 4 0)))
+
+(define newif-checker2
+  '(if (= 2 3)
+       then 1
+       else 2))
 
 (display "Test av ny if-prosedyre\n")
-(display "Hvordan prosedyren ser ut\n")
+(display "Hvordan prosedyrene ser ut\n")
 newif-checker
+newif-checker2
 
-(display "Evaluering av prosedyren, burde bli 4\n")
+(display "Evaluering av prosedyrene, burde bli 4, 2\n")
 (mc-eval newif-checker the-global-environment)
+(mc-eval newif-checker2 the-global-environment)
 
-(display "Sjekk om prosedyren er en if-prosedyre via 'if?'\n")
+(display "Sjekk om prosedyrene er en if-prosedyre via 'if?'\n")
 (mc-eval (if? newif-checker) the-global-environment)
+(mc-eval (if? newif-checker2) the-global-environment)
 
-(display "Sjekk om prosedyren er en special form via 'special-form?'\n")
+(display "Sjekk om prosedyrene er en special form via 'special-form?'\n")
 (mc-eval (special-form? newif-checker) the-global-environment)
+(mc-eval (special-form? newif-checker2) the-global-environment)
 
 (newline)
 (display "***3c***\n")
@@ -135,23 +162,36 @@ newif-checker
          (third 3))
      (+ first second third)))
 
-(display "Test av ny let-prosedyre\n")
-(display "Hvordan prosedyren ser ut\n")
-let-checker
+(define let-checker2
+  '(let ((x 2)
+         (y 3))
+     (display (cons x y))
+     (+ x y)))
 
-(display "Hvordan prosedyren ser ut i lambda-ifisert versjon\n")
+(display "Test av ny let-prosedyre\n")
+(display "Hvordan prosedyrene ser ut\n")
+let-checker
+let-checker2
+
+(display "Hvordan prosedyrene ser ut i lambda-ifisert versjon\n")
 (append-expressions-to-lambda
  (let-to-lambda let-checker)
  (let-expressions let-checker))
+(append-expressions-to-lambda
+ (let-to-lambda let-checker2)
+ (let-expressions let-checker2))
 
-(display "Evaluering av prosedyren, burde vise 6\n")
+(display "Evaluering av prosedyrene, burde vise 6, (2 . 3)5\n")
 (mc-eval let-checker the-global-environment)
+(mc-eval let-checker2 the-global-environment)
 
-(display "Sjekk om prosedyren er en let-prosedyre via 'let?'\n")
+(display "Sjekk om prosedyrene er en let-prosedyre via 'let?'\n")
 (mc-eval (let? let-checker) the-global-environment)
+(mc-eval (let? let-checker2) the-global-environment)
 
 (display "Sjekk om prosedyren er en special form via 'special-form?'\n")
 (mc-eval (special-form? let-checker) the-global-environment)
+(mc-eval (special-form? let-checker2) the-global-environment)
 
 (newline)
 (display "***3d***\n")
@@ -196,3 +236,9 @@ lambexp
 #|(car let-checker2)
 (cdr let-checker2)
 (cadddr (cdr let-checker2))|#
+
+(newline)
+(display "Åpner REPL til testing")
+
+(read-eval-print-loop)
+
