@@ -39,11 +39,14 @@ count
          ;; Konverter stack til å være seg selv der
          ;; vi har appendet den reverserte listen i
          ;; argumentet inn i stacken
-         (if (list? (car rest)) ;; Måtte gjøre et krumspring for å sjekke
+         #|(if (list? (car rest)) ;; Måtte gjøre et krumspring for å sjekke
                                 ;; om rest er en liste i en liste, som den
                                 ;; blir om jeg sender den via (push! stack)
              (set! stack (append (reverse (car rest)) stack))
-             (set! stack (append (reverse rest) stack))))
+             (set! stack (append (reverse rest) stack))))|#
+             (for-each (lambda (x)
+                         (set! stack (cons x stack)))
+                       rest))
         ((equal? message 'stack)
          stack)
         (else
@@ -72,7 +75,7 @@ count
   (st 'stack))
 
 (define (push! st . rest)
-  (st 'push! rest))
+  (apply st 'push! rest))
 
 (pop! s1)
 (stack s1);;(zip zap bah bar)

@@ -238,7 +238,6 @@ Evalueringsregler for and/or
 ############################################################################# |#
 (define (and-or-tests exp) (cdr exp))
 
-
 (define (begin? exp) (tagged-list? exp 'begin))
 
 (define (begin-actions exp) (cdr exp))
@@ -297,9 +296,25 @@ Evalueringsregler for and/or
 ############################################################################# |#
 (define (let? exp) (tagged-list? exp 'let))
 
+;; Bygger opp en lambda av let-uttrykket
+(define (let-to-lambda exp)
+  (make-lambda (let-parameters exp)
+               (let-body exp)))
+
+;; Appender expressions fra let-uttrykket til lambda-uttrykket
+(define (append-expressions-to-lambda lamb exps)
+    (append (list lamb) exps))
+
+;; Evaluerer et let-uttrykk
+(define (eval-let exp env)
+  (mc-eval (append-expressions-to-lambda
+            (let-to-lambda exp)
+            (let-expressions exp)) env))
+
 #| #############################################################################
    Kommenter ut herfra og ned for å kunne kjøre oppg 3d
 ############################################################################# |#
+
 ;; Prosedyre for å hente ut parameter fra uttrykket
 (define (let-parameters exp)
   (define (param-get get-list returnlist)
@@ -321,20 +336,6 @@ Evalueringsregler for and/or
 ;; Prosedyre for å hente ut kroppen fra uttrykket
 (define (let-body exp) (cddr exp))
 
-;; Bygger opp en lambda av let-uttrykket
-(define (let-to-lambda exp)
-  (make-lambda (let-parameters exp)
-               (let-body exp)))
-
-;; Appender expressions fra let-uttrykket til lambda-uttrykket
-(define (append-expressions-to-lambda lamb exps)
-    (append (list lamb) exps))
-
-;; Evaluerer et let-uttrykk
-(define (eval-let exp env)
-  (mc-eval (append-expressions-to-lambda
-            (let-to-lambda exp)
-            (let-expressions exp)) env))
 
 #| #############################################################################
    Kode for nytt let-uttrykk til oppgave 3d.
@@ -344,8 +345,9 @@ Evalueringsregler for and/or
 ############################################################################# |#
 
 #|
-
 ;; Prosedyre for å hente ut parameter fra nytt let-uttrykk
+;; Kjører gjennom 4 og 4 deler av listen som er let-uttrykket, og henter ut
+;; korrekt del for å få tak i parameterene
 (define (let-parameters exp)
   (define (param-get get-list returnlist)
     (if (equal? (cadddr get-list) 'in)
@@ -362,6 +364,7 @@ Evalueringsregler for and/or
   (exps-get (cdr exp) '()))
 
 ;; Prosedyre for å hente ut kropp fra nytt let-uttrykk
+;; Henter ut alt som er etter 'in i let-uttrykket
 (define (let-body exp)
   (define (in-finder search-list)
     (if (equal? (car search-list) 'in)
@@ -369,22 +372,7 @@ Evalueringsregler for and/or
         (in-finder (cdr search-list))))
   (in-finder exp))
 
-;; Bygger opp en lambda av let-uttrykket
-(define (let-to-lambda exp)
-  (make-lambda (let-parameters exp)
-               (let-body exp)))
-
-;; Appender expressions fra let-uttrykket til lambda-uttrykket
-(define (append-expressions-to-lambda lamb exps)
-  (append (list lamb) exps))
-
-;; Evaluerer nytt let-uttrykk
-(define (eval-let exp env)
-  (mc-eval (append-expressions-to-lambda
-            (let-to-lambda exp)
-            (let-expressions exp)) env))
-
-|#
+|#  
 
 ;;; Evaluatorens interne datastrukturer for å representere omgivelser,
 ;;; prosedyrer, osv (seksjon 4.1.3, SICP):
@@ -552,10 +540,9 @@ Evalueringsregler for and/or
    Implementert prosedyre for å legge til nye primitiver
 ################################################################### |#
 (define (install-primitive! msg proc)
-  (let ((insertion-list primitive-procedures))
-    (set! primitive-procedures (append insertion-list
+    (set! primitive-procedures (append primitive-procedures
                                        (list (list msg proc))))
-    (set! the-global-environment (setup-environment))))
+    (set! the-global-environment (setup-environment)))
 
 
 ;;; Hjelpeprosedyrer for REPL-interaksjon (SICP seksjon 4.1.4)

@@ -6,6 +6,9 @@
 (newline)
 (display "***1a*** forklart i fil\n")
 #|
+Oppgave 1a fungerer ikke i REPL'et slik filen er initielt, da
+jeg har redefinert IF-funksjonen i Evaluator.scm. 
+
 (foo 2 square) => 0
 For (foo 2 square) har vi definert en prosedyre som tar inn to
 parametere - cond og else.
@@ -195,7 +198,7 @@ let-checker2
 
 (newline)
 (display "***3d***\n")
-"Se notat om oppgave i evaluator.scm på linje 339"
+"Se notat om oppgave i evaluator.scm på linje 341"
 
 ;; Kode under fungerer bare om man først fjerner kommentering av relevant
 ;; kode i evaluator.scm
@@ -238,7 +241,6 @@ lambexp
 (cadddr (cdr let-checker2))|#
 
 (newline)
-(display "Åpner REPL til testing")
+(display "Åpner REPL til testing\n")
 
 (read-eval-print-loop)
-
